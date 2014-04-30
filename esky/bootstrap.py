@@ -64,7 +64,17 @@ _exit_code = [0]
 #  The os module is not builtin, so we grab what we can from the
 #  platform-specific modules and fudge the rest.
 if "posix" in sys.builtin_module_names:
-    import fcntl
+    try:
+        import fcntl
+    except ImportError:
+        # mock import
+        class fcntl:
+            LOCK_SH = 0
+            def flock(self,fd,mode):
+                pass
+            def __nonzero__(self):
+                return False
+        fcntl = fcntl()
     from posix import listdir, stat, unlink, rename, execv, getcwd, environ
     from posix import open as os_open
     from posix import read as os_read
